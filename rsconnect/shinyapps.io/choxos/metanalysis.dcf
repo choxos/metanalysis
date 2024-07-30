@@ -1,0 +1,12 @@
+name: metanalysis
+title: metanalysis
+username: choxos
+account: choxos
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12384839
+bundleId: 8924428
+url: https://choxos.shinyapps.io/metanalysis/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
