@@ -5,7 +5,7 @@ account: choxos
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 12384839
-bundleId: 8924428
+bundleId: 8938860
 url: https://choxos.shinyapps.io/metanalysis/
 version: 1
 asMultiple: FALSE
