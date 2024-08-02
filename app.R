@@ -49,6 +49,14 @@ ui <- dashboardPage(
         ),
         dashboardBody(
                 useShinyjs(),
+                box(
+                        title = "PICO Question",
+                        status = "primary",
+                        solidHeader = TRUE,
+                        width = 12,
+                        style = "padding: 5px; margin-bottom: 10px;",
+                        uiOutput("pico_info")
+                ),
                 tabItems(
                         tabItem(tabName = "data",
                                 tabBox(
@@ -69,6 +77,13 @@ ui <- dashboardPage(
                                         tabPanel("File Upload",
                                                  fileInput("file", "Choose CSV file", accept = ".csv"),
                                                  actionButton("load_file_data", "Load Data")
+                                        ),
+                                        tabPanel("PICO",
+                                                 textInput("population", "Population"),
+                                                 textInput("intervention", "Intervention"),
+                                                 textInput("comparison", "Comparison"),
+                                                 textInput("outcome", "Outcome"),
+                                                 actionButton("save_pico", "Save PICO")
                                         )
                                 )
                         ),
@@ -370,6 +385,7 @@ server <- function(input, output, session) {
         ma_result <- reactiveVal()
         metareg_vars <- reactiveVal(list())
         rob_data <- reactiveVal(NULL)
+        pico_data <- reactiveVal(NULL)
         
         output$manual_data_entry <- renderUI({
                 n <- input$n_studies
@@ -454,6 +470,35 @@ server <- function(input, output, session) {
                 showNotification("File data loaded successfully", type = "message")
         })
         
+        # Create a single output for PICO information
+        output$pico_info <- renderUI({
+                pico <- pico_data()
+                if (!is.null(pico)) {
+                        tags$div(
+                                style = "font-size: 0.9em; line-height: 1.2;",
+                                tags$span(style = "font-weight: bold;", "P(opulation): "), pico$population, tags$br(),
+                                tags$span(style = "font-weight: bold;", "I(ntervention): "), pico$intervention, tags$br(),
+                                tags$span(style = "font-weight: bold;", "C(omparison): "), pico$comparison, tags$br(),
+                                tags$span(style = "font-weight: bold;", "O(utcome): "), pico$outcome
+                        )
+                } else {
+                        tags$p("PICO question not added yet.")
+                }
+        })
+        
+        # Update the save_pico observer
+        observeEvent(input$save_pico, {
+                pico <- list(
+                        population = input$population,
+                        intervention = input$intervention,
+                        comparison = input$comparison,
+                        outcome = input$outcome
+                )
+                pico_data(pico)
+                showNotification("PICO saved successfully", type = "message")
+        })
+        
+        
         output$summary_measure_ui <- renderUI({
                 if(input$data_type == "Binary") {
                         selectInput("sm", "Summary measure:",
@@ -521,6 +566,7 @@ server <- function(input, output, session) {
                 output$data_table <- renderDT({
                         datatable(data())
                 })
+                
                 
                 showNotification("Analyses done successfully.", type = "message")
         })
@@ -594,6 +640,7 @@ server <- function(input, output, session) {
                 updateSelectizeInput(session, "metareg_vars", 
                                      choices = names(new_vars), 
                                      selected = NULL)
+                
                 
                 showNotification("Meta-regression variables saved successfully", type = "message")
         })
@@ -775,6 +822,8 @@ server <- function(input, output, session) {
                 )
                 
                 rob_data(rob_df)
+                
+                
                 showNotification("Risk of Bias assessment saved successfully", type = "message")
         })
         
@@ -863,6 +912,7 @@ server <- function(input, output, session) {
                         if (result$imprecision != "Not serious") explanations <- c(explanations, paste("Imprecision:", result$imprecision_explanation))
                         if (result$publication_bias != "Undetected") explanations <- c(explanations, paste("Publication bias:", result$publication_bias_explanation))
                         paste(explanations, collapse = "\n\n")
+                        
                 })
         })
         
