@@ -1,1 +1,1 @@
-# meta-analysis
+# Metanalysis
